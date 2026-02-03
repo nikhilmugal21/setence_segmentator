@@ -64,9 +64,7 @@ if sentence.strip():
         st.subheader("Segmented diagram")
         # Streamlit displays SVG via HTML component reliably
         svg = svg.replace("<svg","<svg style='color:white; fill:white; stroke:white'")
-
-components.html(svg, height=420, scrolling=True)
-
+        components.html(svg, height=420, scrolling=True)
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
