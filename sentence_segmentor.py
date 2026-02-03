@@ -7,14 +7,23 @@ import streamlit.components.v1 as components
 @st.cache_resource
 def setup_nltk():
     import nltk
+
+    # Tokenizers
     nltk.download("punkt", quiet=True)
     try:
         nltk.download("punkt_tab", quiet=True)
     except Exception:
         pass
+
+    # POS taggers (old + new naming)
     nltk.download("averaged_perceptron_tagger", quiet=True)
+    try:
+        nltk.download("averaged_perceptron_tagger_eng", quiet=True)
+    except Exception:
+        pass
 
 setup_nltk()
+
 
 # ---- Chunk grammar (simple, like your example) ----
 # NP: (Det) (Adj*) (Noun+)
