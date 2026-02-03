@@ -6,10 +6,16 @@ import streamlit.components.v1 as components
 # ---- One-time downloads (cached) ----
 @st.cache_resource
 def setup_nltk():
+    import nltk
     nltk.download("punkt", quiet=True)
+    try:
+        nltk.download("punkt_tab", quiet=True)
+    except Exception:
+        pass
     nltk.download("averaged_perceptron_tagger", quiet=True)
 
 setup_nltk()
+)
 
 # ---- Chunk grammar (simple, like your example) ----
 # NP: (Det) (Adj*) (Noun+)
