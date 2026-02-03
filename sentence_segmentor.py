@@ -28,19 +28,79 @@ setup_nltk()
 # ---- Chunk grammar (simple, like your example) ----
 # NP: (Det) (Adj*) (Noun+)
 # VP: Verb + (NP) + (optional PP)
+PENN_TAG_GLOSSARY = {
+    "CC": "Coordinating conjunction",
+    "CD": "Cardinal number",
+    "DT": "Determiner",
+    "EX": "Existential there",
+    "FW": "Foreign word",
+    "IN": "Preposition/subordinating conjunction",
+    "JJ": "Adjective",
+    "JJR": "Adjective, comparative",
+    "JJS": "Adjective, superlative",
+    "LS": "List item marker",
+    "MD": "Modal",
+    "NN": "Noun, singular or mass",
+    "NNS": "Noun, plural",
+    "NNP": "Proper noun, singular",
+    "NNPS": "Proper noun, plural",
+    "PDT": "Predeterminer",
+    "POS": "Possessive ending",
+    "PRP": "Personal pronoun",
+    "PRP$": "Possessive pronoun",
+    "RB": "Adverb",
+    "RBR": "Adverb, comparative",
+    "RBS": "Adverb, superlative",
+    "RP": "Particle",
+    "SYM": "Symbol",
+    "TO": "to",
+    "UH": "Interjection",
+    "VB": "Verb, base form",
+    "VBD": "Verb, past tense",
+    "VBG": "Verb, gerund/present participle",
+    "VBN": "Verb, past participle",
+    "VBP": "Verb, non-3rd person singular present",
+    "VBZ": "Verb, 3rd person singular present",
+    "WDT": "Wh-determiner",
+    "WP": "Wh-pronoun",
+    "WP$": "Possessive wh-pronoun",
+    "WRB": "Wh-adverb",
+    ".": "Sentence-final punctuation",
+    ",": "Comma",
+    ":": "Colon or ellipsis",
+    "``": "Opening quotation mark",
+    "''": "Closing quotation mark",
+    "(": "Left bracket",
+    ")": "Right bracket",
+}
+
+def build_pos_glossary(pos_tags):
+    """
+    pos_tags: list of (token, tag)
+    returns: list of dict rows for Streamlit table
+    """
+    used_tags = sorted({tag for _, tag in pos_tags})
+    rows = []
+    for tag in used_tags:
+        rows.append({
+            "POS tag": tag,
+            "Meaning": PENN_TAG_GLOSSARY.get(tag, "Unknown / not in glossary"),
+        })
+    return rows
+
+
 GRAMMAR = r"""
   NP: {<DT>?<JJ.*>*<NN.*>+}
   PP: {<IN><NP>}
   VP: {<VB.*><NP|PP>*}
 """
-
 chunker = nltk.RegexpParser(GRAMMAR)
 
 def chunk_sentence(sent: str) -> Tree:
     tokens = nltk.word_tokenize(sent)
     tags = nltk.pos_tag(tokens)
     tree = chunker.parse(tags)
-    return tree
+    return tree, tags
 
 def tree_to_svg_html(tree: Tree) -> str:
     # svgling renders NLTK trees as SVG (no system graphviz needed).
@@ -58,13 +118,16 @@ sentence = st.text_input(
 
 if sentence.strip():
     try:
-        t = chunk_sentence(sentence)
+        t, tags = chunk_sentence(sentence)
         svg = tree_to_svg_html(t)
 
         st.subheader("Segmented diagram")
         # Streamlit displays SVG via HTML component reliably
         svg = tree_to_svg_html(t)
         components.html(svg, height=420, scrolling=True)
+
+        st.subheader("Token-level POS tags")
+        st.table([{"Token": w, "POS tag": t} for w, t in tags])
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
