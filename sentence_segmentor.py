@@ -15,7 +15,6 @@ def setup_nltk():
     nltk.download("averaged_perceptron_tagger", quiet=True)
 
 setup_nltk()
-)
 
 # ---- Chunk grammar (simple, like your example) ----
 # NP: (Det) (Adj*) (Noun+)
