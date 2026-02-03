@@ -74,19 +74,19 @@ PENN_TAG_GLOSSARY = {
     ")": "Right bracket",
 }
 
-def build_pos_glossary(pos_tags):
+def build_used_pos_glossary(pos_tags):
     """
     pos_tags: list of (token, tag)
-    returns: list of dict rows for Streamlit table
+    returns: rows for Streamlit table with only used tags
     """
     used_tags = sorted({tag for _, tag in pos_tags})
-    rows = []
-    for tag in used_tags:
-        rows.append({
+    return [
+        {
             "POS tag": tag,
-            "Meaning": PENN_TAG_GLOSSARY.get(tag, "Unknown / not in glossary"),
-        })
-    return rows
+            "Meaning": PENN_TAG_GLOSSARY.get(tag, "Unknown tag"),
+        }
+        for tag in used_tags
+    ]
 
 
 GRAMMAR = r"""
@@ -126,8 +126,8 @@ if sentence.strip():
         svg = tree_to_svg_html(t)
         components.html(svg, height=420, scrolling=True)
 
-        st.subheader("Token-level POS tags")
-        st.table([{"Token": w, "POS tag": t} for w, t in tags])
+        st.subheader("POS tag glossary")
+        st.table(build_used_pos_glossary(tags))
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
